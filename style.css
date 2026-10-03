@@ -1,0 +1,63 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#1a1a2e;color:#e0e0e0;padding:60px 20px 20px}
+body.drag::after{content:'Drop config file to load';position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(15,52,96,.85);color:#0ff;font-size:1.6em;border:3px dashed #4cc9f0;z-index:200}
+.navbar{position:fixed;top:0;left:0;right:0;height:44px;background:#0f1629;border-bottom:1px solid #0f3460;display:flex;align-items:center;gap:20px;padding:0 20px;z-index:100}
+.navbar .brand{color:#0ff;font-weight:bold;font-size:1.1em;white-space:nowrap}
+.navbar .title{color:#8899aa;font-size:.9em}
+.navbar .file{margin-left:auto;color:#fff;font-family:monospace;font-size:.85em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.navbar .dirty{width:10px;height:10px;border-radius:50%;flex:none}
+.navbar .dirty.on{background:#fa0}
+.card{background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{color:#4cc9f0;font-size:1.1em;margin-bottom:12px;border-bottom:1px solid #0f3460;padding-bottom:8px}
+.hint{font-size:.8em;color:#888;margin:8px 0}
+code{font-family:monospace;color:#4cc9f0}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+label.inline{font-size:.85em;color:#aaa;display:flex;align-items:center;gap:6px;margin-left:8px}
+button{padding:8px 20px;background:#4cc9f0;color:#1a1a2e;border:none;border-radius:4px;cursor:pointer;font-weight:bold}
+button:hover{background:#0ff}
+button:disabled{background:#345;color:#789;cursor:default}
+button.save{background:#4f4}
+button.save:hover{background:#0f0}
+button.danger{background:#f77}
+button.danger:hover{background:#f44}
+.msg{margin-top:8px;padding:8px;border-radius:4px;display:none}
+.msg.ok{display:block;background:#143a14;color:#4f4;border:1px solid #4f4}
+.msg.err{display:block;background:#3a1414;color:#f44;border:1px solid #f44}
+.disp-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.disp-tabs button{background:#0f3460;color:#ccc;border:1px solid #4cc9f0;padding:6px 14px;font-weight:normal}
+.disp-tabs button:hover{background:#1a4a80;color:#fff}
+.disp-tabs button.active{background:#4cc9f0;color:#1a1a2e;font-weight:bold}
+.disp-tabs button .n{display:inline-block;min-width:1.6em;margin-left:6px;font-size:.75em;opacity:.8}
+.grid-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8em;margin-top:8px;user-select:none}
+th,td{padding:3px 4px;text-align:center;border:1px solid #0f3460}
+th{color:#4cc9f0;background:#0f3460}
+th.col{cursor:pointer}
+th.col:hover,td.hdr:hover{color:#fff;background:#1a4a80}
+td.hdr{text-align:left;color:#aaa;font-weight:bold;background:#0f3460;cursor:pointer;white-space:nowrap}
+td.cell{cursor:pointer;width:28px;height:24px}
+td.cell.on{background:#4cc9f0}
+td.cell:not(.on):hover{background:#1a4a80}
+td.cell.on:hover{background:#0ff}
+input.hex{width:56px;background:#0f3460;border:1px solid #4cc9f0;color:#fff;font-family:monospace;text-align:center;padding:2px}
+input.hex.bad{border-color:#f44}
+.summary{margin-top:12px;font-size:.85em;color:#aaa}
+.summary span{color:#fff;font-family:monospace;word-break:break-all}
+table.overview{font-family:monospace;font-size:.9em}
+table.overview tr.row{cursor:pointer}
+table.overview tr.row:hover td{background:#1a4a80}
+table.overview tr.active td{background:#0f3460;color:#0ff}
+table.overview td.z{color:#456}
+pre{font-family:monospace;font-size:.8em;color:#aaa;max-height:260px;overflow:auto;background:#0f1629;padding:8px;border-radius:4px}
+.serial-opts{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:.85em;color:#aaa}
+.serial-opts label{display:flex;align-items:center;gap:6px}
+.serial-opts input,.serial-opts select{padding:4px 6px;background:#0f3460;border:1px solid #4cc9f0;border-radius:4px;color:#fff;width:70px}
+.port-status{font-size:.85em;color:#888;margin-left:8px}
+.port-status.on{color:#4f4}
+.progress{height:8px;background:#0f1629;border-radius:4px;margin-top:12px;overflow:hidden}
+.progress div{height:100%;width:0;background:#4f4;transition:width .1s}
+pre.term{margin-top:8px;min-height:120px;color:#ccc;white-space:pre-wrap;word-break:break-all}
+pre.term .tx{color:#4cc9f0}
+pre.term .err{color:#f44}
+pre.term .info{color:#fa0}

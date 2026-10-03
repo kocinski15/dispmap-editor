@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Display Map Editor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="navbar">
+  <span class="brand">Vipark RS13</span>
+  <span class="title">Display Map Editor</span>
+  <span class="file" id="file-name">No file loaded</span>
+  <span class="dirty" id="dirty" title="Unsaved changes"></span>
+</div>
+
+<div class="card">
+  <h2>Config File</h2>
+  <div class="toolbar">
+    <button onclick="openFile()" title="Open RS13cfg.txt (Ctrl+O)">&#128194; Open</button>
+    <button class="save" onclick="saveFile(false)" title="Save (Ctrl+S)">&#128190; Save</button>
+    <button onclick="saveFile(true)" title="Save under a new name">Save As&hellip;</button>
+    <button class="danger" onclick="newConfig()" title="Clear all maps">New</button>
+    <label class="inline"><input type="checkbox" id="opt-savemap" checked> append <code>savemap</code></label>
+  </div>
+  <input type="file" id="file-input" accept=".txt,text/plain" style="display:none" onchange="readFileInput(this)">
+  <p class="hint">Or drag &amp; drop a config file anywhere on the page.</p>
+  <div class="msg" id="msg"></div>
+</div>
+
+<div class="card">
+  <h2>Select Display</h2>
+  <div class="disp-tabs" id="disp-tabs"></div>
+</div>
+
+<div class="card">
+  <h2>Sensor Assignments &mdash; <span id="disp-title">Display 0</span></h2>
+  <p class="hint">Check sensors that count toward this display's occupancy total.
+    Click &amp; drag to paint. Click a port / sensor header to toggle a whole row / column.</p>
+  <div class="grid-wrap"><div id="map-grid"></div></div>
+  <div class="summary">Portmap: <span id="portmap-hex"></span></div>
+  <div class="toolbar">
+    <button onclick="clearDisplay()">Clear display</button>
+    <button onclick="copyDisplay()">Copy display</button>
+    <button onclick="pasteDisplay()" id="btn-paste" disabled>Paste display</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>All Displays Overview</h2>
+  <p class="hint">Click a row to edit that display.</p>
+  <div class="grid-wrap"><table id="all-maps" class="overview"></table></div>
+</div>
+
+<div class="card">
+  <h2>Config Text Preview</h2>
+  <pre id="preview"></pre>
+</div>
+
+<div class="card">
+  <h2>Send to Device (Serial / RS485)</h2>
+  <p class="hint">Sends the config text above character by character. After each character the sender waits for its echo
+    or the character timeout, whichever comes first; after each line it waits the extra line delay for the device's reply.
+    Needs a browser with Web Serial (recent Chrome, Edge or Firefox), opened from <code>http://localhost</code> or <code>https</code>.</p>
+  <div class="toolbar">
+    <button onclick="serialConnect()" id="btn-connect">&#128268; Connect</button>
+    <button onclick="serialDisconnect()" id="btn-disconnect" disabled>Disconnect</button>
+    <span class="port-status" id="port-status">Not connected</span>
+  </div>
+  <div class="serial-opts">
+    <label>Baud <input type="number" id="ser-baud" value="9600" min="300"></label>
+    <label>Parity <select id="ser-parity"><option value="even" selected>E</option><option value="odd">O</option><option value="none">N</option></select></label>
+    <label>Data <select id="ser-data"><option>8</option><option>7</option></select></label>
+    <label>Stop <select id="ser-stop"><option>1</option><option>2</option></select></label>
+    <label>Line end <select id="ser-eol"><option value="\r" selected>CR</option><option value="\n">LF</option><option value="\r\n">CR LF</option></select></label>
+    <label>Char timeout <input type="number" id="ser-char-ms" value="10" min="0"> ms</label>
+    <label>Line delay <input type="number" id="ser-line-ms" value="100" min="0"> ms</label>
+  </div>
+  <div class="toolbar">
+    <button class="save" onclick="serialSend()" id="btn-send" disabled>&#9654; Send config</button>
+    <button class="danger" onclick="serialAbort()" id="btn-abort" disabled>Stop</button>
+    <button onclick="clearTerm()">Clear log</button>
+  </div>
+  <div class="progress"><div id="send-bar"></div></div>
+  <div class="summary" id="send-stats"></div>
+  <pre id="term" class="term"></pre>
+</div>
+
+<script src="app.js"></script>
+<script src="serial.js"></script>
+</body>
+</html>
