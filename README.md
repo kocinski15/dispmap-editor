@@ -3,6 +3,9 @@
 Offline editor for the Vipark RS13 display→sensor map config file, extracted from
 `src/web/dispmap.html` of [stmhub](https://github.com/kocinski15/stmhub). No device or server needed.
 
+End-user instructions: **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)**: assigning parking sensors to displays
+and sending the configuration to the controller.
+
 ## Use
 
 Open `index.html` in a browser (double-click works). No build, no dependencies.
