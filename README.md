@@ -7,8 +7,8 @@ Offline editor for the Vipark RS13 display→sensor map config file, extracted f
 
 Open `index.html` in a browser (double-click works). No build, no dependencies.
 
-- **Open** (Ctrl+O) or drag & drop a config file (e.g. `RS13cfg.txt` from the device's Backup button).
-- Pick a display, then click / drag over cells to assign sensors (0–F) per port (0–11).
+- **Open** (Ctrl+O) or drag & drop a config file (e.g. `RS13cfg.txt`).
+- Pick a display, then click / drag over cells to assign sensors (0–F) per port (0–E).
   Click a port header to toggle the row, a sensor header to toggle the column, or type hex directly.
 - **Save** (Ctrl+S) / **Save As** (Ctrl+Shift+S). In Chrome/Edge the file is written in place;
   other browsers download it.
@@ -37,14 +37,16 @@ python -m http.server 8765
 
 ## File format
 
-Identical to the firmware CLI and the device backup, so it can be restored via the device web UI
-or pasted into the serial/telnet CLI:
+One command per line, as accepted by the device CLI (commands are case-insensitive when reading):
 
 ```
-setmap <disp 0-9> <port 0-11> <mask_hex>
+setmapdp <disp_hex 0-9> <port_hex 0-E> <mask_hex>
 ...
-savemap
+saveconf
 ```
+
+`saveconf` is written at the end when the **append saveconf** box is checked. Opening a file sets that box
+to match: checked if the file contained `saveconf`, unchecked if not.
 
 Bit *n* of the mask = sensor *n* on that port. `#` lines are comments. Displays/ports not listed are 0.
 

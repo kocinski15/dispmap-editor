@@ -1,10 +1,10 @@
 // Standalone display-map editor for Vipark RS13 config files.
 // File format (same as the device backup / CLI):
-//   setmap <disp> <port> <mask_hex>
-//   savemap
+//   setmapdp <disp_hex> <port_hex> <mask_hex>
+//   saveconf   (kept at the end of the saved file if the opened file had it)
 // Lines starting with '#' are comments.
 
-const PORTS = 12, SENSORS = 16, DISPS = 10;
+const PORTS = 15, SENSORS = 16, DISPS = 10;
 const DEFAULT_NAME = 'RS13cfg.txt';
 
 // maps[d][p] = 16-bit sensor mask
@@ -19,7 +19,8 @@ function emptyMaps() {
   return Array.from({length: DISPS}, () => new Array(PORTS).fill(0));
 }
 
-const hex4 = v => v.toString(16).toUpperCase().padStart(4, '0');
+const hex = v => v.toString(16).toUpperCase();
+const hex4 = v =>v.toString(16).toUpperCase().padStart(4, '0');
 const $ = id => document.getElementById(id);
 
 function showMsg(t, ok) {
@@ -46,28 +47,29 @@ function setFileName(n) {
 function parseConfig(text) {
   const out = emptyMaps();
   const warnings = [];
-  let count = 0;
+  let count = 0, saveconf = false;
   text.split(/\r?\n/).forEach((raw, i) => {
     const line = raw.trim();
     if (!line || line.startsWith('#')) return;
-    if (/^savemap$/i.test(line)) return;
-    const m = line.match(/^setmap\s+(\d+)\s+(\d+)\s+(?:0x)?([0-9a-f]+)$/i);
+    if (/^saveconf$/i.test(line)) { saveconf = true; return; }
+    // all three parameters are hex: display, port, mask
+    const m = line.match(/^setmapdp\s+(?:0x)?([0-9a-f]+)\s+(?:0x)?([0-9a-f]+)\s+(?:0x)?([0-9a-f]+)$/i);
     if (!m) { warnings.push(`line ${i + 1}: unrecognized "${line}"`); return; }
-    const d = parseInt(m[1], 10), p = parseInt(m[2], 10), v = parseInt(m[3], 16);
+    const d = parseInt(m[1], 16), p = parseInt(m[2], 16), v = parseInt(m[3], 16);
     if (d >= DISPS || p >= PORTS) { warnings.push(`line ${i + 1}: display/port out of range`); return; }
     if (v > 0xFFFF) warnings.push(`line ${i + 1}: mask truncated to 16 bits`);
     out[d][p] = v & 0xFFFF;
     count++;
   });
-  return {maps: out, count, warnings};
+  return {maps: out, count, warnings, saveconf};
 }
 
 function serializeConfig() {
   let txt = '';
   for (let d = 0; d < DISPS; d++)
     for (let p = 0; p < PORTS; p++)
-      txt += 'setmap ' + d + ' ' + p + ' ' + maps[d][p].toString(16).toUpperCase() + '\n';
-  if ($('opt-savemap').checked) txt += 'savemap\n';
+      txt += 'setmapdp ' + hex(d) + ' ' + hex(p) + ' ' + hex(maps[d][p]) + '\n';
+  if ($('opt-saveconf').checked) txt += 'saveconf\n';
   return txt;
 }
 
@@ -94,8 +96,9 @@ function readFileInput(input) {
 
 function loadText(text, name, handle) {
   const r = parseConfig(text);
-  if (r.count === 0) { showMsg('No valid setmap lines found in ' + name, false); return; }
+  if (r.count === 0) { showMsg('No valid setmapdp lines found in ' + name, false); return; }
   maps = r.maps;
+  $('opt-saveconf').checked = r.saveconf;   // keep saveconf in the saved file only if the opened file had it
   fileHandle = handle;
   setFileName(name);
   setDirty(false);
@@ -176,7 +179,7 @@ function buildGrid() {
     h += `<th class="col" onclick="toggleCol(${s})" title="Toggle sensor ${s} on all ports">${s.toString(16).toUpperCase()}</th>`;
   h += '<th>Hex</th></tr>';
   for (let p = 0; p < PORTS; p++) {
-    h += `<tr><td class="hdr" onclick="toggleRow(${p})" title="Toggle all sensors on port ${p}">Port ${p}</td>`;
+    h += `<tr><td class="hdr" onclick="toggleRow(${p})" title="Toggle all sensors on port ${hex(p)}">Port ${hex(p)}</td>`;
     for (let s = 0; s < SENSORS; s++)
       h += `<td class="cell" id="c_${p}_${s}" data-p="${p}" data-s="${s}"></td>`;
     h += `<td><input type="text" class="hex" id="hex_${p}" maxlength="4" onchange="hexInput(${p})" onkeydown="if(event.key==='Enter')this.blur()"></td></tr>`;
@@ -227,7 +230,7 @@ function toggleCol(s) {
 function hexInput(p) {
   const el = $('hex_' + p);
   const t = el.value.trim();
-  if (!/^[0-9a-f]{1,4}$/i.test(t)) { el.classList.add('bad'); showMsg('Invalid hex value for port ' + p, false); return; }
+  if (!/^[0-9a-f]{1,4}$/i.test(t)) { el.classList.add('bad'); showMsg('Invalid hex value for port ' + hex(p), false); return; }
   el.classList.remove('bad');
   maps[curDisp][p] = parseInt(t, 16);
   changed();
@@ -266,7 +269,7 @@ function renderGrid() {
       $(`c_${p}_${s}`).classList.toggle('on', !!(m[p] & (1 << s)));
     const el = $('hex_' + p);
     if (document.activeElement !== el) { el.value = hex4(m[p]); el.classList.remove('bad'); }
-    summary += 'P' + p + '=' + hex4(m[p]) + ' ';
+    summary += 'P' + hex(p) + '=' + hex4(m[p]) + ' ';
   }
   $('portmap-hex').textContent = summary;
 }
@@ -275,7 +278,7 @@ function renderGrid() {
 
 function renderOverview() {
   let h = '<tr><th></th>';
-  for (let p = 0; p < PORTS; p++) h += '<th>P' + p + '</th>';
+  for (let p = 0; p < PORTS; p++) h += '<th>P' + hex(p) + '</th>';
   h += '</tr>';
   for (let d = 0; d < DISPS; d++) {
     h += `<tr class="row${d === curDisp ? ' active' : ''}" onclick="selectDisplay(${d})"><td>Disp${d}</td>`;
@@ -319,7 +322,7 @@ window.addEventListener('keydown', e => {
 });
 
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-$('opt-savemap').addEventListener('change', () => { setDirty(true); renderAll(); });
+$('opt-saveconf').addEventListener('change', () => { setDirty(true); renderAll(); });
 
 buildGrid();
 renderAll();
